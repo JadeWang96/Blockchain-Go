@@ -21,7 +21,14 @@ which indicates the breach of chain.
 Therefore, no one can modify the transactions on each block privately. 
 And the complex calculation of hash value is motivation for people to mine Bitcoin.
 
-Hope this is clear enough to understand how it works.
+Just imagine, if we live in a world without trusty third-party transaction platform, such as Alipay, Paypal, 
+how can we know it is safe to conduct the transactions? 
+
+Blockchain provides the possibility that "broadcast" every transactions to all entities with E-signature(Private key).
+Every participant have access to check whether this transaction is valid and this process guarantee the 
+reliability of this system.
+
+Above is my interpretation, hope this is clear enough to understand how it works.
 
 ### Implementation
 
@@ -30,6 +37,9 @@ Hope this is clear enough to understand how it works.
 
 #### Proof of Work Algorithm
 - Hashcash
+
+The principle is a brute force method, the more powerful of your calculation capability,
+the higher possibilities you get the answer(hash value).
 
 ### Pre-Request
 - Golang 13.6
