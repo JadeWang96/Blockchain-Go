@@ -35,6 +35,15 @@ Above is my interpretation, hope this is clear enough to understand how it works
 - Golang 13.6
 - Golang Modules: [BoltDB](https://github.com/boltdb/bolt.git)
 
+#### File Structure
+- main.go
+- block.go
+- blockchain.go
+- cli.go
+- proofofwork.go
+- transaction.go
+- utils.go
+
 #### Hash
 - Simply using SHA-256
 
@@ -55,21 +64,25 @@ $ GOPATH=$pwd
 $ go build -i -o Blockchain_Go.exe .
 or
 $ go build Blockchain_Go/
+$
+$ ./Blockchain_Go.exe
 ```
 This repository can be run in GoLand directly.
 
 ### IV. Run
 ```go
-$ ./Blockchain_Go.exe
-or
-$ Blockchain_Go
+$ Blockchain_Go printchain
+$ Blockchain_Go addblock -data "Send 1 BTC to Jade"
+$ Blockchain_Go getbalance -address Jade
 ```
 
 ### V. Result Sample
 ```text
 
 ```
+```text
 
+```
 
 ### VI. Acknowledge
 All credits go to [Jeiwan](https://jeiwan.net/posts/building-blockchain-in-go-part-1/)
