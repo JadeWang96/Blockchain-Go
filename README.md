@@ -4,7 +4,7 @@ Coding for fun, GO GO GO! :beers: :beers:
 
 ![Golang](https://golang.org/lib/godoc/images/footer-gopher.jpg?style=centerme)
 
-### Introduction
+### I. Introduction
 Building a simplified Blockchain in Go.
 
 If you are not familiar with Blockchain concepts, go [here](https://youtu.be/TVlo66aOZE0) (A very good video in Chinese).
@@ -30,7 +30,10 @@ reliability of this system.
 
 Above is my interpretation, hope this is clear enough to understand how it works.
 
-### Implementation
+### II. Implementation
+#### Language Version
+- Golang 13.6
+- Golang Modules: [BoltDB](https://github.com/boltdb/bolt.git)
 
 #### Hash
 - Simply using SHA-256
@@ -41,10 +44,11 @@ Above is my interpretation, hope this is clear enough to understand how it works
 The principle is a brute force method, the more powerful of your calculation capability,
 the higher possibilities you get the answer(hash value).
 
-### Pre-Request
-- Golang 13.6
+#### Database
+- BoltDB
 
-### Build
+
+### III. Build
 ```go
 $ GOROOT=/usr/local/go
 $ GOPATH=$pwd
@@ -52,12 +56,19 @@ $ go build -i -o Blockchain_Go.exe .
 or
 $ go build Blockchain_Go/
 ```
-### Run
+
+### IV. Run
 ```go
 $ ./Blockchain_Go.exe
 or
 $ Blockchain_Go
 ```
 
-### Acknowledge
+### V. Result Sample
+```text
+
+```
+
+
+### VI. Acknowledge
 All credits go to [Jeiwan](https://jeiwan.net/posts/building-blockchain-in-go-part-1/)
