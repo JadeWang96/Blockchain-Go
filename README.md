@@ -56,6 +56,7 @@ $ go build -i -o Blockchain_Go.exe .
 or
 $ go build Blockchain_Go/
 ```
+This repository can be run in GoLand directly.
 
 ### IV. Run
 ```go
