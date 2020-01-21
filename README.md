@@ -2,7 +2,7 @@
 
 Coding for fun, GO GO GO! :beers: :beers:
 
-![Golang](https://golang.org/lib/godoc/images/footer-gopher.jpg?style=centerme)
+![Bitcoin](https://miro.medium.com/max/3000/1*bFlCApzWW8EYVmSAnXcWYA.jpeg)
 
 ### I. Introduction
 Building a simplified Blockchain in Go.
@@ -56,6 +56,11 @@ the higher possibilities you get the answer(hash value).
 #### Database
 - BoltDB
 
+#### Digital Signature
+- Elliptic Curve Cryptography (Without deep implementation, just use it)
+
+#### Readable Public Key
+- Base58 Algorithm
 
 ### III. Build
 ```go
@@ -86,3 +91,5 @@ $ Blockchain_Go getbalance -address Jade
 
 ### VI. Acknowledge
 All credits go to [Jeiwan](https://jeiwan.net/posts/building-blockchain-in-go-part-1/)
+
+![Golang](https://golang.org/lib/godoc/images/footer-gopher.jpg?style=centerme)
