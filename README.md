@@ -31,6 +31,10 @@ reliability of this system.
 Above is my interpretation, hope this is clear enough to understand how it works.
 
 ### II. Implementation
+####Function
+So far, this blockchain supports mining, transaction and wallet management, I would to enable it to be a 
+distributed system in the near future.
+
 #### Language Version
 - Golang 13.6
 - Golang Modules: [BoltDB](https://github.com/boltdb/bolt.git)
@@ -72,20 +76,38 @@ $ GOPATH=$pwd
 $ go build -i -o Blockchain_Go.exe .
 or
 $ go build Blockchain_Go/
-$
-$ ./Blockchain_Go.exe
 ```
 This repository can be run in GoLand directly.
 
 ### IV. Run
 ```go
+$ Blockchain_Go createwallet
+$ Blockchain_Go createblockchain -address <wallet address>
+$ Blockchain_Go send -from <wallet address1> -to <wallet address2>
 $ Blockchain_Go printchain
 $ Blockchain_Go addblock -data "Send 1 BTC to Jade"
-$ Blockchain_Go getbalance -address Jade
+$ Blockchain_Go getbalance -address <wallet address>
 ```
 
 ### V. Result Sample
 ```text
+$ blockchain_go createwallet
+Your new address: 1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy
+
+$ blockchain_go createwallet
+Your new address: 1N3NM8heUZnBZoGvCRtQNJBbamRc7B5AXi
+
+$ blockchain_go createblockchain -address 1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy
+0000003bdc62e4028da8ccc36704805fc10497b6644248301300bf588fe207ad
+Done!
+
+$ blockchain_go printchain
+============ Block 0000003bdc62e4028da8ccc36704805fc10497b6644248301300bf588fe207ad ============
+Prev. block:
+PoW: false
+
+$ blockchain_go getbalance -address 1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy
+Balance of '1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy': 0
 
 ```
 ```text

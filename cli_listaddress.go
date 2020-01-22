@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
 func (cli *CLI) listAddresses() {
-	wallets := NewWallet()
+	wallets, err := NewWallets()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	addresses := wallets.GetAddresses()
 

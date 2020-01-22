@@ -13,6 +13,7 @@ package main
  */
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -266,4 +267,34 @@ func (bc *Blockchain) Iterator() *BlockchainIterator {
 	bci := &BlockchainIterator{bc.tip, bc.db}
 
 	return bci
+}
+
+// SignTransaction signs inputs of a Transaction
+func (bc *Blockchain) SignTransaction(tx *Transaction, privKey ecdsa.PrivateKey) {
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vin {
+		prevTX, err := bc.FindTransaction(vin.Txid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
+	}
+
+	tx.Sign(privKey, prevTXs)
+}
+
+// VerifyTransaction verifies transaction input signatures
+func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
+	prevTXs := make(map[string]Transaction)
+
+	for _, vin := range tx.Vin {
+		prevTX, err := bc.FindTransaction(vin.Txid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
+	}
+
+	return tx.Verify(prevTXs)
 }

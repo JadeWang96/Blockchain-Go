@@ -211,7 +211,7 @@ func (tx Transaction) IsCoinbase() bool {
 
 // Implement general transactions
 // Create a transaction, put it in the block, and mine the block
-func NewUTXTransaction(from, to string, amount int, bc *Blockchain) *Transaction {
+func NewUTXOTransaction(from, to string, amount int, bc *Blockchain) *Transaction {
 	var inputs []TXInput
 	var outputs []TXOutput
 

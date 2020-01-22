@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func (cli *CLI) createWallet() {
-	wallets := NewWallet()
+	wallets,_ := NewWallets()
 	address := wallets.CreateWallet()
 	wallets.SaveToFile()
 
