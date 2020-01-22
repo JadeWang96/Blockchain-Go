@@ -43,6 +43,9 @@ Above is my interpretation, hope this is clear enough to understand how it works
 - proofofwork.go
 - transaction.go
 - utils.go
+- wallet.go
+- wallets.go
+- base85.go
 
 #### Hash
 - Simply using SHA-256

@@ -12,7 +12,9 @@ package main
  * 				4. Create a new Blockchain instance points to the genesis block
  */
 import (
+	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -29,19 +31,6 @@ const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second
 type Blockchain struct {
 	tip []byte
 	db  *bolt.DB
-}
-
-// BlockchainIterator is used to iterate over blockchain blocks
-type BlockchainIterator struct {
-	currentHash []byte
-	db          *bolt.DB
-}
-
-// Attached iterator to blockchain
-func (bc *Blockchain) Iterator() *BlockchainIterator {
-	bci := &BlockchainIterator{bc.tip, bc.db}
-
-	return bci
 }
 
 func (bc *Blockchain) MineBlock(transactions []*Transaction) {
@@ -74,6 +63,9 @@ func (bc *Blockchain) MineBlock(transactions []*Transaction) {
 
 		return nil
 	})
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func dbExists() bool {
@@ -121,15 +113,15 @@ func CreateBlockchain(address string) *Blockchain {
 	}
 
 	var tip []byte
+	cbtx := NewCoinbaseTX(address, genesisCoinbaseData)
+	genesis := NewGenesisBlock(cbtx)
+
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		cbtx := NewCoinbaseTX(address, genesisCoinbaseData)
-		genesis := NewGenesisBlock(cbtx)
-
 		b, err := tx.CreateBucket([]byte(blocksBucket))
 		if err != nil {
 			log.Panic(err)
@@ -158,30 +150,11 @@ func CreateBlockchain(address string) *Blockchain {
 	return &bc
 }
 
-// Allow iterator find the next block in the chain
-func (i *BlockchainIterator) Next() *Block {
-	var block *Block
-
-	err := i.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(blocksBucket))
-		encodeBlock := b.Get(i.currentHash)
-		block = DeserializeBlock(encodeBlock)
-		return nil
-	})
-
-	if err != nil {
-		log.Panic(err)
-	}
-
-	i.currentHash = block.PrevBlockHash
-	return block
-}
-
 // Find transactions containing unspent outputs
 // Return a list of transactions containing unspent outputs
-func (bc *Blockchain) FindUnspentTransactions(address string) []Transaction {
+func (bc *Blockchain) FindUnspentTransactions(pubKeyHash []byte) []Transaction {
 	var unspentTXs []Transaction
-	spentTX0s := make(map[string][]int)
+	spentTXOs := make(map[string][]int)
 	bci := bc.Iterator()
 
 	for {
@@ -193,24 +166,24 @@ func (bc *Blockchain) FindUnspentTransactions(address string) []Transaction {
 		Outputs:
 			for outIdx, out := range tx.Vout {
 				// Was the output spent?
-				if spentTX0s[txID] != nil {
-					for _, spentOut := range spentTX0s[txID] {
-						if spentOut == outIdx {
+				if spentTXOs[txID] != nil {
+					for _, spentOutIdx := range spentTXOs[txID] {
+						if spentOutIdx == outIdx {
 							continue Outputs
 						}
 					}
 				}
 
-				if out.CanBeUnlockedWith(address) {
+				if out.IsLockedWithKey(pubKeyHash) {
 					unspentTXs = append(unspentTXs, *tx)
 				}
 			}
 
 			if tx.IsCoinbase() == false {
 				for _, in := range tx.Vin {
-					if in.CanUnlockOutputWith(address) {
+					if in.UsesKey(pubKeyHash) {
 						inTxID := hex.EncodeToString(in.Txid)
-						spentTX0s[inTxID] = append(spentTX0s[inTxID], in.Vout)
+						spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Vout)
 					}
 				}
 			}
@@ -220,30 +193,32 @@ func (bc *Blockchain) FindUnspentTransactions(address string) []Transaction {
 			break
 		}
 	}
+
 	return unspentTXs
 }
 
 // Takes the transactions and returns only outputs
-func (bc *Blockchain) FindUTXO(address string) []TXOutput {
-	var UTX0s []TXOutput
-	unspentTransactions := bc.FindUnspentTransactions(address)
+func (bc *Blockchain) FindUTXO(pubKeyHash []byte) []TXOutput {
+	var UTXOs []TXOutput
+	unspentTransactions := bc.FindUnspentTransactions(pubKeyHash)
 
 	for _, tx := range unspentTransactions {
 		for _, out := range tx.Vout {
-			if out.CanBeUnlockedWith(address) {
-				UTX0s = append(UTX0s, out)
+			if out.IsLockedWithKey(pubKeyHash) {
+				UTXOs = append(UTXOs, out)
 			}
 		}
 	}
-	return UTX0s
+
+	return UTXOs
 }
 
 // Find all unspent outputs and ensure that they have enough value
 // Iterates over all unspent transactions and accumulates their values
 // When the accumulated value is more or equals to the amount we want to transfer, it stops
-func (bc *Blockchain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
+func (bc *Blockchain) FindSpendableOutputs(pubKeyHash []byte, amount int) (int, map[string][]int) {
 	unspentOutputs := make(map[string][]int)
-	unspentTXs := bc.FindUnspentTransactions(address)
+	unspentTXs := bc.FindUnspentTransactions(pubKeyHash)
 	accumulated := 0
 
 Work:
@@ -251,7 +226,7 @@ Work:
 		txID := hex.EncodeToString(tx.ID)
 
 		for outIdx, out := range tx.Vout {
-			if out.CanBeUnlockedWith(address) && accumulated < amount {
+			if out.IsLockedWithKey(pubKeyHash) && accumulated < amount {
 				accumulated += out.Value
 				unspentOutputs[txID] = append(unspentOutputs[txID], outIdx)
 
@@ -263,4 +238,32 @@ Work:
 	}
 
 	return accumulated, unspentOutputs
+}
+
+// FindTransaction finds a transaction by its ID
+func (bc *Blockchain) FindTransaction(ID []byte) (Transaction, error) {
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+
+		for _, tx := range block.Transactions {
+			if bytes.Compare(tx.ID, ID) == 0 {
+				return *tx, nil
+			}
+		}
+
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+
+	return Transaction{}, errors.New("Transaction is not found")
+}
+
+// Attached iterator to blockchain
+func (bc *Blockchain) Iterator() *BlockchainIterator {
+	bci := &BlockchainIterator{bc.tip, bc.db}
+
+	return bci
 }
