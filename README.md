@@ -31,7 +31,8 @@ reliability of this system.
 Above is my interpretation, hope this is clear enough to understand how it works.
 
 ### II. Implementation
-####Function
+
+#### Function
 So far, this blockchain supports mining, transaction and wallet management, I would to enable it to be a 
 distributed system in the near future.
 
@@ -43,9 +44,9 @@ distributed system in the near future.
 - main.go
 - block.go
 - blockchain.go
-- cli.go
+- cli.go(function splited)
 - proofofwork.go
-- transaction.go
+- transaction.go(function splited)
 - utils.go
 - wallet.go
 - wallets.go
@@ -72,7 +73,7 @@ the higher possibilities you get the answer(hash value).
 ### III. Build
 ```go
 $ GOROOT=/usr/local/go
-$ GOPATH=$pwd
+$ GOPATH= <Current working directory>
 $ go build -i -o Blockchain_Go.exe .
 or
 $ go build Blockchain_Go/
@@ -108,9 +109,6 @@ PoW: false
 
 $ blockchain_go getbalance -address 1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy
 Balance of '1NzmVp1G9qHzzk5xqQE9pR3njNfXQK5Psy': 0
-
-```
-```text
 
 ```
 
